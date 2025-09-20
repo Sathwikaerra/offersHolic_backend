@@ -134,7 +134,7 @@ export const register = async (req, res) => {
     console.log('Request Body:', req.body);
     console.log("entered")
     // Check if either email or mobile number is provided
-    if (!email || !mobileNo) {
+    if (!email && !mobileNo) {
       return res.status(400).json({ msg: "Email or mobile number is required" });
     }
     let existingUser;

@@ -436,7 +436,7 @@ export const getCurrentUserClarificationOffers = async (req, res) => {
 //get nearby offers
 export const getNearbyOffers = async (req, res) => {
   try {
-    const { lat, long, maxDistance = 10000 } = req.query;
+    const { lat, long, maxDistance = 30000 } = req.query;
     console.log(lat, long, maxDistance);
     if (!lat || !long) {
       return res.status(400).json({ message: 'Latitude and longitude are required.' });
