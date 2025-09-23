@@ -4,6 +4,9 @@ import User from "../../models/User.js";
 
 // Get user from token
 
+
+
+
 export const getUserFromToken = async (req, res) => {
   try {
 
@@ -58,15 +61,27 @@ export const getAllUsers = async (req, res) => {
 // Get user by ID
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (user == null) {
-      return res.status(404).json({ message: 'User not found' });
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
+
+    // ✅ Run subscription check (no await needed)
+    console.log("checking subscription")
+    user.checkSubscriptions();
+    
+    console.log("✅✅ subscription check")
+
+    // ✅ Save changes to DB (needs await)
+    await user.save();
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 

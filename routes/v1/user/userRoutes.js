@@ -13,8 +13,89 @@ import {
 import { authenticateAdmin, authenticateToken } from '../../../middlewares/auth/authMiddleware.js';
 import { createAddress, deleteAddressById, getAddressById, getAllAddress, getCurrentUserAddresses, getSavedOffers, updateAddressById } from '../../../controllers/address/addressController.js';
 // import addressRoute from '../address/addressRoutes.js';
+import User from '../../../models/User.js';
 
 const router = express.Router();
+
+
+
+
+
+// POST /user/v1/start-free-trial
+router.post("/start-free-trial", authenticateToken, async (req, res) => {
+  try {
+    console.log("entered free trail")
+    console.log(req.user)
+    const user = await User.findById(req.user.id);
+
+   
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+     console.log("user found")
+
+    if (user.freeTrial.status === "active") {
+      return res.status(400).json({ message: "Free trial already active" });
+    }
+
+    // Activate free trial
+    user.freeTrial.status = "active";
+    user.freeTrial.startDate = new Date();
+    user.freeTrial.expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    await user.save();
+
+    return res.json({
+      message: "Free trial activated",
+      freeTrial: user.freeTrial,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: err.message }); 
+  }
+});
+
+router.post("/start-membership", authenticateToken, async (req, res) => {
+  try {
+    const { planType } = req.body; // monthly, quarterly, yearly, custom
+    const user = await User.findById(req.user._id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Activate membership
+    user.membership.status = "active";
+    user.membership.startDate = new Date();
+
+    let duration;
+    switch (planType) {
+      case "monthly":
+        duration = 30;
+        break;
+      case "quarterly":
+        duration = 90;
+        break;
+      case "yearly":
+        duration = 365;
+        break;
+      case "custom":
+        duration = req.body.customDays || 30;
+        break;
+      default:
+        duration = 30;
+    }
+
+    user.membership.expiryDate = new Date(Date.now() + duration * 24 * 60 * 60 * 1000);
+    user.membership.planType = planType;
+
+    await user.save();
+
+    return res.json({
+      message: "Membership activated",
+      membership: user.membership,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: err.message });
+  }
+});
 
 // Get user from token
 router.get('/current', getUserFromToken);

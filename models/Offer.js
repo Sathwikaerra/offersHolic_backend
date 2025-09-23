@@ -102,6 +102,12 @@ const offerSchema = new mongoose.Schema({
       return this.status === 'clarification submitted';
     },
   },
+  viewedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Assuming you have a User model
+    },
+  ],
   clicks: [clickSchema], // Use the clickSchema as a sub-schema
   views: {
     type: Number,
@@ -117,6 +123,16 @@ const offerSchema = new mongoose.Schema({
   offerReel: {
     type: String
   },
+   videos: [
+  {
+    videoUrl: {
+      type: String,
+      required: true
+    }
+  }
+],
+  
+
   gallery: [
 
     {
@@ -124,6 +140,7 @@ const offerSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      
     }
 
   ],

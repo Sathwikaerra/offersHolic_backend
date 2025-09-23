@@ -11,7 +11,7 @@ import { getUserIdFromToken } from '../../utils/helpers/helpers.js';
 export const createOffer = async (req, res) => {
   try {
 
-    const { title, description, category, offerReel, featuredImage, gallery, offerType, offerValue, offerExpiryDate, offerDetails, businessProfile } = req.body;
+    const { title, description,videos, category, offerReel, featuredImage, gallery, offerType, offerValue, offerExpiryDate, offerDetails, businessProfile } = req.body;
 
     console.log(title)
     console.log(businessProfile)
@@ -43,6 +43,7 @@ export const createOffer = async (req, res) => {
       featuredImage,
       offerExpiryDate,
       gallery,
+      videos,
       offerReel,
       offerDetails,
     });
@@ -97,6 +98,7 @@ export const updateOfferStatus = async (req, res) => {
       return res.status(404).json({ message: 'Offer not found' });
     }
 
+    console.log("offer found")
     offer.status = status;
     await offer.save();
 
@@ -166,22 +168,36 @@ export const incrementOfferClicks = async (req, res) => {
 // Increment offer views
 export const incrementOfferViews = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // offerId
+
+    const userId = req.user.id;
+    // make sure user is authenticated (JWT or session)
+
     const offer = await Offer.findById(id);
     if (!offer) {
-      return res.status(404).json({ message: 'Offer not found' });
+      return res.status(404).json({ message: "Offer not found" });
+    }
+    console.log('checking for the user')
+
+    // Check if user already viewed
+    if (!offer.viewedBy.includes(userId)) {
+      offer.views += 1;
+      offer.viewedBy.push(userId);
+      await offer.save();
+       console.log('view  counted user viewd this  before')
+      return res.status(200).json({ message: "View counted" });
     }
 
-    offer.views += 1;
-    await offer.save();
+    console.log('view not counted no user viewd this  before')
 
-    res.status(200).json({ message: 'Views incremented successfully' });
-  }
-  catch (error) {
-    console.error('Error incrementing views:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+
+    res.status(200).json({ message: "User already viewed" });
+  } catch (error) {
+    console.error("Error incrementing views:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 
 //  Controller Get all offers
@@ -212,13 +228,16 @@ export const getOfferById = async (req, res) => {
     const { id } = req.params;
     const offer = await Offer.findById(id).populate({
       path: 'businessProfile',
-      populate: {
-        path: 'location', // Populate the 'location' field from 'businessProfile'
-      },
-    }).populate('category');
+      populate: [
+          { path: "location" }, // populate location
+           // 👈 populate users inside followers
+        ],
+    }).populate('category')
+      
     if (!offer) {
       return res.status(404).json({ message: 'Offer not found' });
     }
+    console.log('offer fetched')
     res.status(200).json(offer);
   } catch (error) {
     console.error('Error fetching offer:', error);
@@ -436,7 +455,7 @@ export const getCurrentUserClarificationOffers = async (req, res) => {
 //get nearby offers
 export const getNearbyOffers = async (req, res) => {
   try {
-    const { lat, long, maxDistance = 30000 } = req.query;
+    const { lat, long, maxDistance = 18000 } = req.query;
     console.log(lat, long, maxDistance);
     if (!lat || !long) {
       return res.status(400).json({ message: 'Latitude and longitude are required.' });
