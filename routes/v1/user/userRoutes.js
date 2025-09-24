@@ -40,7 +40,7 @@ router.post("/start-free-trial", authenticateToken, async (req, res) => {
     // Activate free trial
     user.freeTrial.status = "active";
     user.freeTrial.startDate = new Date();
-    user.freeTrial.expiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    user.freeTrial.expiryDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000); // 30 days
     await user.save();
 
     return res.json({
@@ -53,12 +53,18 @@ router.post("/start-free-trial", authenticateToken, async (req, res) => {
   }
 });
 
+
+
 router.post("/start-membership", authenticateToken, async (req, res) => {
   try {
-    const { planType } = req.body; // monthly, quarterly, yearly, custom
-    const user = await User.findById(req.user._id);
+    const { planType } = req.body;
+     // monthly, quarterly, yearly, custom
+    const user = await User.findById(req.user.id);
+   
 
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    console.log(user.name)
 
     // Activate membership
     user.membership.status = "active";
@@ -86,6 +92,8 @@ router.post("/start-membership", authenticateToken, async (req, res) => {
     user.membership.planType = planType;
 
     await user.save();
+
+    console.log('saved')
 
     return res.json({
       message: "Membership activated",

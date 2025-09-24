@@ -15,6 +15,12 @@ import teamRoute from "./routes/v1/team/teamRoute.js";
 // import shareRouter from './routes/v1/share/share.js'
 import cookieParser from "cookie-parser";
 import notifcationRoute from "./routes/v1/notifications/notificationRoutes.js";
+import paymentRoute from "./routes/v1/payments/paymentRoute.js";
+import plansRoutes from "./routes/v1/plans/plansRoutes.js";
+
+
+
+
 import './services/cron/cronService.js';
 import path from "path";
 import { fileURLToPath } from 'url';
@@ -161,6 +167,8 @@ app.use("/subscriptions/v1", subscriptionsRoute);
 app.use("/offer/v1", offerRoute);
 app.use("/team/v1", teamRoute);
 app.use('/notifications/v1',notifcationRoute );
+app.use('/payments/v1',paymentRoute );
+app.use("/plans/v1", plansRoutes);
 // app.use("/share", shareRouter);
 // app.use("/coupons/v1", couponRoute);
 
