@@ -1,5 +1,6 @@
 import express from "express";
 import Razorpay from "razorpay";
+import crypto from "crypto";
 
 const router = express.Router();
 
@@ -9,13 +10,13 @@ const secret=process.env.RAZORPAY_SECRET
 
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY,
-  key_secret: process.env.RAZORPAY_SECRET,
+  key_id: key,
+  key_secret: secret,
 });
 
 
 
-import crypto from "crypto";
+
 
 
 router.post("/verify-payment", (req, res) => {
@@ -48,6 +49,8 @@ router.post("/create-order", async (req, res) => {
     
 
     const { amount, currency } = req.body;
+
+    console.log(amount,currency)
 
     const options = {
       amount: amount * 100, // convert to paise

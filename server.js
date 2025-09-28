@@ -53,6 +53,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(cors({ origin: "*" }));
+
 // Enable CORS for a specific origin
 app.use(cors({
   origin: '*',
